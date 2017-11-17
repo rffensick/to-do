@@ -3,8 +3,7 @@ module.exports = {
         "browser": true,
         "commonjs": true,
         "es6": true,
-        "node": true,
-        "jquery": true
+        "node": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -29,8 +28,6 @@ module.exports = {
         "semi": [
             "error",
             "always"
-        ],
-        "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
-        "no-console": 0
+        ]
     }
 };

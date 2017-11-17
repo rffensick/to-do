@@ -45,12 +45,13 @@ function CreateUser(userName, userRank, userScore) {
 	});
 }
 // Изменение пользователя
-function EditUser(userName, userRank, userScore) {
+function EditUser(userId, userName, userRank, userScore) {
 	$.ajax({
 		url: "api/users",
 		contentType: "application/json",
 		method: "PUT",
 		data: JSON.stringify({
+			id: userId,
 			name: userName,
 			rank: userRank,
 			score: userScore
@@ -58,7 +59,8 @@ function EditUser(userName, userRank, userScore) {
 		success: function (user) {
 			reset();
 			console.log(user);
-			$("tr[data-rowid='" + user._id + "']").replaceWith(row(user));
+			var tr = $("tr[data-id='" + user._id + "']").replaceWith(row(user));
+			$("button").text("+").removeClass("btn-success").attr("data-id", "0");
 		}
 	});
 }
@@ -71,24 +73,22 @@ function DeleteUser(id) {
 		method: "DELETE",
 		success: function (user) {
 			console.log(user);
-			$("tr[data-rowid='" + user._id + "']").remove();
+			$("tr[data-id='" + user._id + "']").remove();
 		}
 	});
 }
-// создание строки для таблицы
-// var row = function (user) {
-// 	return "<tr data-rowid='" + user._id + "'><td>" + user._id + "</td>" +
-// 		"<td>" + user.name + "</td> <td>" + user.age + "</td>" +
-// 		"<td><a class='editLink' data-id='" + user._id + "'>Изменить</a> | " +
-// 		"<a class='removeLink' data-id='" + user._id + "'>Удалить</a></td></tr>";
-// };
+
+function reset() {
+	var form = document.forms["usersForm"];
+	form.reset();
+}
 
 var row = function(user) {
 	return "<tr class='tr-item' data-id='"+ user._id +"'>" +
-		"<td>" + user.name + " <input class='form-control' type='text'> </td>" +
-		"<td>" + user.rank + "<input class='form-control' type='text'> </td" +
-		"<td>" + user.score + "<input class='form-control' type='text'> </td" +
-		"<td> <div class='btn btn-group'> <a class='btn btn- danger delete'>Delete</a> <a class='btn btn- warning  edit'>Edit</a> </div> </td></tr>";
+		"<td>" + user.name + "</td>" +
+		"<td>" + user.rank + "</td>" +
+		"<td>" + user.score + "</td>" +
+		"<td> <div class='btn btn-group'> <a class='btn btn-danger delete'>Delete</a> <a class='btn btn-warning  edit'>Edit</a> </div> </td></tr>";
 };
 
 // отправка формы
@@ -97,22 +97,32 @@ $("form").submit(function (e) {
 	var name = this.elements["name"].value;
 	var rank = this.elements["rank"].value;
 	var score = this.elements["score"].value;
-	if (this.getAttribute("data-id") == 0)
+	var editing = $(this).hasClass("editing");
+	var id = $("button").attr("data-id");
+	if (!editing) {
 		CreateUser(name, rank, score);
-	else
-		EditUser(name, rank, score);
+		console.log("1");
+	}	else {
+		EditUser(id, name, rank, score);
+		console.log("2");
+	}
 });
 
 // нажимаем на ссылку Изменить
 $("body").on("click", ".edit", function () {
-	var id = $(this).data("id");
+	$("button").text("Save").addClass("btn-success");
+	var id = $(this).parent().parent().parent().data("id");
+	var form = $("form").addClass("editing");
+	$("button").attr("data-id", id);
+	console.log(id);
 	GetUser(id);
 });
+
 // нажимаем на ссылку Удалить
 $("body").on("click", ".delete", function () {
-	var id = $(this).data("id");
+	var id = $(this).parent().parent().parent().data("id");
 	DeleteUser(id);
 });
 
-// загрузка пользователей
+// // загрузка пользователей
 GetUsers();
